@@ -31,9 +31,7 @@ list_github_tags() {
 }
 
 list_all_versions() {
-	# TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-	# Change this function if rswift has other means of determining installable versions.
-	list_github_tags
+  list_github_tags
 }
 
 download_release() {
@@ -41,11 +39,10 @@ download_release() {
 	version="$1"
 	filename="$2"
 
-	# TODO: Adapt the release URL convention for rswift
-	url="$GH_REPO/archive/v${version}.tar.gz"
+  	url="$GH_REPO/releases/download/${version}/rswift.zip"
 
-	echo "* Downloading $TOOL_NAME release $version..."
-	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
+  	echo "* Downloading $TOOL_NAME release $version..."
+  	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
 
 install_version() {
@@ -59,7 +56,9 @@ install_version() {
 
 	(
 		mkdir -p "$install_path"
-		cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
+		download_release "$version" "$release_file"
+		unzip $release_file -d "${install_path}" || fail "Could not extract $release_file"
+		rm "$release_file"
 
 		# TODO: Assert rswift executable exists.
 		local tool_cmd
